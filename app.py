@@ -691,12 +691,20 @@ def page_annotate():
 
     st.markdown("---")
 
-    # ── Thumbnail ──
+    # ── Thumbnail with annotation toggle ──
     start_frame = event.get("start_frame", 0)
-    thumb_path = data_manager.get_thumbnail_path(video_stem, start_frame)
+    th_col1, th_col2 = st.columns([5, 1])
+    with th_col2:
+        show_skeleton = st.checkbox("AI", value=True, key=f"skel_{idx}",
+                                    help="Toggle skeleton overlay on/off")
+    thumb_path = data_manager.get_thumbnail_path(video_stem, start_frame, clean=not show_skeleton)
+    if not thumb_path:
+        # Fall back to annotated version if clean doesn't exist
+        thumb_path = data_manager.get_thumbnail_path(video_stem, start_frame, clean=False)
     if thumb_path:
         img = Image.open(thumb_path)
-        st.image(img, use_container_width=True)
+        caption = "Skeleton + zones" if show_skeleton else "Clean frame"
+        st.image(img, use_container_width=True, caption=caption)
     else:
         st.markdown(
             f"<div style='background:#e9ecef; padding:40px; text-align:center; "
@@ -1055,21 +1063,26 @@ def page_annotate():
             unsafe_allow_html=True,
         )
 
-    # ── Filmstrip (scrollable) ──
+    # ── Filmstrip (scrollable + zoom) ──
     strip_path = data_manager.THUMBNAILS_DIR / video_stem / "strips" / f"strip_{start_frame:06d}.jpg"
     if strip_path.exists():
-        st.markdown('<p class="section-label">Filmstrip</p>', unsafe_allow_html=True)
+        fs_col1, fs_col2 = st.columns([3, 1])
+        with fs_col1:
+            st.markdown('<p class="section-label">Filmstrip</p>', unsafe_allow_html=True)
+        with fs_col2:
+            zoomed = st.checkbox("Zoom", value=False, key=f"strip_zoom_{idx}")
         import base64
         with open(strip_path, "rb") as sf:
             strip_b64 = base64.b64encode(sf.read()).decode()
         sf_start = event.get('start_frame', '?')
         sf_end = event.get('end_frame', '?')
+        strip_height = "200px" if zoomed else "80px"
         st.markdown(f"""
         <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;
              border:1px solid #e0e0e0; border-radius:8px; padding:4px;
              margin:4px 0; white-space:nowrap;">
             <img src="data:image/jpeg;base64,{strip_b64}"
-                 style="height:80px; max-width:none; display:block;">
+                 style="height:{strip_height}; max-width:none; display:block;">
         </div>
         <p style="font-size:0.7rem; color:#999; text-align:center; margin:2px 0;">
             Frames {sf_start} - {sf_end}
