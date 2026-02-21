@@ -664,15 +664,34 @@ def page_annotate():
     existing_red = _find_existing("red")
     existing_blue = _find_existing("blue")
 
-    # AI badge + timestamp
-    st.markdown(f"""
-    <div class="ai-badge">
-        AI: <strong>{ai_display}</strong>
-        &nbsp;&middot;&nbsp; {confidence:.0%}
-        &nbsp;&middot;&nbsp; {fighter.upper()}
-        &nbsp;&middot;&nbsp; {mins}:{secs:02d}
-    </div>
-    """, unsafe_allow_html=True)
+    # AI badge + timestamp + incorrect button
+    ai_col1, ai_col2 = st.columns([4, 1])
+    with ai_col1:
+        st.markdown(f"""
+        <div class="ai-badge">
+            AI: <strong>{ai_display}</strong>
+            &nbsp;&middot;&nbsp; {confidence:.0%}
+            &nbsp;&middot;&nbsp; {fighter.upper()}
+            &nbsp;&middot;&nbsp; {mins}:{secs:02d}
+        </div>
+        """, unsafe_allow_html=True)
+    with ai_col2:
+        if st.button("Incorrect", key=f"incorrect_ai_{idx}",
+                      help="Mark AI prediction as wrong (saves as false positive for training)"):
+            data_manager.add_annotation(
+                video_stem=video_stem,
+                event=event,
+                corrections={
+                    "technique": "neutral_stance",
+                    "fighter_color": fighter,
+                    "notes": f"False positive: AI predicted {ai_display}",
+                },
+                annotated_by=st.session_state.get("annotator_name", ""),
+            )
+            # Move to next
+            if pos_in_filter < filter_total - 1:
+                st.session_state["event_idx"] = filtered_indices[pos_in_filter + 1]
+            st.rerun()
 
     # ── Scoreboard (source of truth) ──
     sb_key = f"sb_{video_stem}"
