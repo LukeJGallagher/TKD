@@ -1050,7 +1050,13 @@ def page_annotate():
         )
 
     # ── Filmstrip (scrollable + zoom) ──
-    strip_path = data_manager.THUMBNAILS_DIR / video_stem / "strips" / f"strip_{start_frame:06d}.jpg"
+    # Use clean filmstrip when AI toggle is off
+    if show_skeleton:
+        strip_path = data_manager.THUMBNAILS_DIR / video_stem / "strips" / f"strip_{start_frame:06d}.jpg"
+    else:
+        strip_path = data_manager.THUMBNAILS_DIR / video_stem / "strips_clean" / f"strip_{start_frame:06d}.jpg"
+        if not strip_path.exists():
+            strip_path = data_manager.THUMBNAILS_DIR / video_stem / "strips" / f"strip_{start_frame:06d}.jpg"
     if strip_path.exists():
         fs_col1, fs_col2 = st.columns([3, 1])
         with fs_col1:

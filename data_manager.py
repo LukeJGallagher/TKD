@@ -88,14 +88,16 @@ def load_match_report(video_stem: str) -> Optional[Dict]:
 
 def get_thumbnail_path(video_stem: str, frame_num: int, clean: bool = False) -> Optional[Path]:
     """Get path to a thumbnail image for a specific frame.
-    clean parameter accepted for API compatibility but ignored (cloud has single thumbnail set).
+    clean=True returns the clean (no skeleton) version from the clean/ subdirectory.
+    clean=False returns the annotated version (skeleton + zones) from the main directory.
     """
     thumb_dir = THUMBNAILS_DIR / video_stem
     if not thumb_dir.exists():
         return None
-    # Try exact frame
+    # Choose subdirectory based on clean flag
+    search_dir = thumb_dir / "clean" if clean else thumb_dir
     for ext in [".jpg", ".jpeg", ".png"]:
-        p = thumb_dir / f"frame_{frame_num:06d}{ext}"
+        p = search_dir / f"frame_{frame_num:06d}{ext}"
         if p.exists():
             return p
     return None
