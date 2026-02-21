@@ -1,0 +1,42 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\20251116-Taekwondo_51kg__ KSA_Dunya_Abutaleb_Vs_TUR_Eli\u0307f_Akg\u00fcl_Final_2.MP4",
+    "resolution": "1280x720",
+    "fps": 59.96006699915006,
+    "total_frames": 9900,
+    "duration_seconds": 165.11
+  },
+  "processing": {
+    "frames_processed": 9900,
+    "frame_skip": 1,
+    "processing_time_seconds": 2913.74,
+    "avg_fps": 3.4
+  },
+  "broadcast": {
+    "camera_cuts": 0,
+    "live_frames": 9093,
+    "skipped_frames": 807,
+    "live_segments": 192,
+    "avg_histogram_correlation": 0.983
+  },
+  "detections": {
+    "total_fighter_detections": 24435,
+    "red_fighter_detections": 9509,
+    "blue_fighter_detections": 8678,
+    "frames_with_both_fighters": 9093
+  },
+  "techniques": {
+    "total_events": 98,
+    "active_techniques": 98,
+    "red_techniques": 47,
+    "blue_techniques": 51,
+    "red_estimated_score": 41,
+    "blue_estimated_score": 64,
+    "technique_distribution": {
+      "Punch": 69,
+      "Block": 20,
+      "Back Kick": 9
+    },
+    "classifier_tier": "rule_based"
+  }
+}

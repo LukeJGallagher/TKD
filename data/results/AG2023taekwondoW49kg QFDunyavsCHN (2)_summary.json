@@ -1,0 +1,40 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\AG2023taekwondoW49kg QFDunyavsCHN (2).mp4",
+    "resolution": "1280x720",
+    "fps": 60.000009559850156,
+    "total_frames": 50210,
+    "duration_seconds": 836.83
+  },
+  "processing": {
+    "frames_processed": 10042,
+    "frame_skip": 5,
+    "processing_time_seconds": 2656.44,
+    "avg_fps": 3.78
+  },
+  "detections": {
+    "total_fighter_detections": 17493,
+    "red_fighter_detections": 7569,
+    "blue_fighter_detections": 6543,
+    "frames_with_both_fighters": 6019
+  },
+  "techniques": {
+    "total_events": 437,
+    "active_techniques": 437,
+    "red_techniques": 238,
+    "blue_techniques": 199,
+    "red_estimated_score": 529,
+    "blue_estimated_score": 398,
+    "technique_distribution": {
+      "Front Kick": 18,
+      "Spin Hook": 50,
+      "Axe Kick": 55,
+      "Back Kick": 58,
+      "Punch": 179,
+      "Block": 40,
+      "Roundhouse": 32,
+      "Side Kick": 5
+    },
+    "classifier_tier": "rule_based"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\20251116-Taekwondo_-51kg__ KSA_ Dunya_Abutaleb_Vs_UZB_ Laylo Khasanova _SF1_1.MP4",
+    "resolution": "1280x720",
+    "fps": 59.96006813046625,
+    "total_frames": 9630,
+    "duration_seconds": 160.61
+  },
+  "processing": {
+    "frames_processed": 9630,
+    "frame_skip": 1,
+    "processing_time_seconds": 2581.5,
+    "avg_fps": 3.73
+  },
+  "broadcast": {
+    "camera_cuts": 0,
+    "live_frames": 8062,
+    "skipped_frames": 1561,
+    "live_segments": 144,
+    "avg_histogram_correlation": 0.99
+  },
+  "detections": {
+    "total_fighter_detections": 23986,
+    "red_fighter_detections": 7420,
+    "blue_fighter_detections": 6603,
+    "frames_with_both_fighters": 8069
+  },
+  "techniques": {
+    "total_events": 130,
+    "active_techniques": 130,
+    "red_techniques": 74,
+    "blue_techniques": 56,
+    "red_estimated_score": 153,
+    "blue_estimated_score": 76,
+    "technique_distribution": {
+      "Punch": 77,
+      "Block": 15,
+      "Back Kick": 31,
+      "Spin Hook": 3,
+      "Axe Kick": 4
+    },
+    "classifier_tier": "rule_based"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\20251116-Taekwondo_70kg__ KSA_Dunya_Saber_Vs_UZB_Ozoda_Sobirjonova_SF_2.MP4",
+    "resolution": "1280x720",
+    "fps": 59.96006558335092,
+    "total_frames": 10260,
+    "duration_seconds": 171.11
+  },
+  "processing": {
+    "frames_processed": 10260,
+    "frame_skip": 1,
+    "processing_time_seconds": 2667.55,
+    "avg_fps": 3.85
+  },
+  "broadcast": {
+    "camera_cuts": 1,
+    "live_frames": 9728,
+    "skipped_frames": 525,
+    "live_segments": 239,
+    "avg_histogram_correlation": 0.991
+  },
+  "detections": {
+    "total_fighter_detections": 25730,
+    "red_fighter_detections": 8503,
+    "blue_fighter_detections": 8702,
+    "frames_with_both_fighters": 9740
+  },
+  "techniques": {
+    "total_events": 123,
+    "active_techniques": 123,
+    "red_techniques": 60,
+    "blue_techniques": 63,
+    "red_estimated_score": 118,
+    "blue_estimated_score": 90,
+    "technique_distribution": {
+      "Punch": 74,
+      "Block": 14,
+      "Back Kick": 19,
+      "Axe Kick": 7,
+      "Spin Hook": 5,
+      "Side Kick": 4
+    },
+    "classifier_tier": "rule_based"
+  }
+}

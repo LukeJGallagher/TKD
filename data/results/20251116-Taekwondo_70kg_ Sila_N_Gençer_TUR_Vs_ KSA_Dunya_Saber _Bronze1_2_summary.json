@@ -1,0 +1,44 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\20251116-Taekwondo_70kg_ Sila_N_Gen\u00e7er_TUR_Vs_ KSA_Dunya_Saber _Bronze1_2.MP4",
+    "resolution": "1280x720",
+    "fps": 59.96006813046625,
+    "total_frames": 9630,
+    "duration_seconds": 160.61
+  },
+  "processing": {
+    "frames_processed": 9630,
+    "frame_skip": 1,
+    "processing_time_seconds": 2521.03,
+    "avg_fps": 3.82
+  },
+  "broadcast": {
+    "camera_cuts": 0,
+    "live_frames": 9270,
+    "skipped_frames": 360,
+    "live_segments": 129,
+    "avg_histogram_correlation": 0.988
+  },
+  "detections": {
+    "total_fighter_detections": 25845,
+    "red_fighter_detections": 9253,
+    "blue_fighter_detections": 8968,
+    "frames_with_both_fighters": 9270
+  },
+  "techniques": {
+    "total_events": 85,
+    "active_techniques": 85,
+    "red_techniques": 49,
+    "blue_techniques": 36,
+    "red_estimated_score": 73,
+    "blue_estimated_score": 35,
+    "technique_distribution": {
+      "Punch": 55,
+      "Block": 15,
+      "Back Kick": 10,
+      "Side Kick": 4,
+      "Spin Hook": 1
+    },
+    "classifier_tier": "rule_based"
+  }
+}
