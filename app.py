@@ -230,14 +230,33 @@ init_state()
 
 
 # ---------------------------------------------------------------------------
-# Header
+# Header with logo
 # ---------------------------------------------------------------------------
+import base64
+
+@st.cache_data
+def _load_logo_b64():
+    logo_path = Path(__file__).parent / "logo.png"
+    if logo_path.exists():
+        return base64.b64encode(logo_path.read_bytes()).decode()
+    return None
+
 def render_header():
-    st.markdown("""
+    logo_b64 = _load_logo_b64()
+    logo_html = ""
+    if logo_b64:
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 40px; margin-right: 10px; vertical-align: middle;">'
+    st.markdown(f"""
     <div style="background: linear-gradient(135deg, #235036 0%, #18342a 100%);
-         padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; text-align: center;">
-        <h2 style="color: white; margin: 0; font-size: 1.3rem;">TKD Match Annotation</h2>
-        <p style="color: #ebce83; margin: 2px 0 0 0; font-size: 0.85rem;">Team Saudi</p>
+         padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; text-align: center;
+         border-bottom: 3px solid #ebce83;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            {logo_html}
+            <div>
+                <h2 style="color: white; margin: 0; font-size: 1.3rem;">TKD Match Annotation</h2>
+                <p style="color: #ebce83; margin: 2px 0 0 0; font-size: 0.85rem;">Team Saudi Performance Analysis</p>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
