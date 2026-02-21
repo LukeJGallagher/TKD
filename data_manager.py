@@ -86,8 +86,10 @@ def load_match_report(video_stem: str) -> Optional[Dict]:
         return json.load(f)
 
 
-def get_thumbnail_path(video_stem: str, frame_num: int) -> Optional[Path]:
-    """Get path to a thumbnail image for a specific frame."""
+def get_thumbnail_path(video_stem: str, frame_num: int, clean: bool = False) -> Optional[Path]:
+    """Get path to a thumbnail image for a specific frame.
+    clean parameter accepted for API compatibility but ignored (cloud has single thumbnail set).
+    """
     thumb_dir = THUMBNAILS_DIR / video_stem
     if not thumb_dir.exists():
         return None
@@ -320,8 +322,11 @@ def get_match_for_video(video_stem: str) -> Optional[Dict]:
 
 
 def save_match_group(match_name: str, video_stem: str, part: int,
-                     red_name: str = "", blue_name: str = ""):
-    """Add or update a video in a match group."""
+                     red_name: str = "", blue_name: str = "", **kwargs):
+    """Add or update a video in a match group.
+    Extra kwargs (red_country, blue_country, weight, championship, date, result)
+    are stored as top-level match metadata.
+    """
     matches = load_matches()
     if match_name not in matches:
         matches[match_name] = {
@@ -335,6 +340,11 @@ def save_match_group(match_name: str, video_stem: str, part: int,
         matches[match_name]["red_name"] = red_name
     if blue_name:
         matches[match_name]["blue_name"] = blue_name
+
+    # Store extra metadata (country, weight, championship, date, result)
+    for key, val in kwargs.items():
+        if val:
+            matches[match_name][key] = val
 
     # Add or update video entry
     videos = matches[match_name]["videos"]
