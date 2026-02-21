@@ -230,6 +230,47 @@ init_state()
 
 
 # ---------------------------------------------------------------------------
+# Reusable: selectbox with "Add New" for persisted lookup lists
+# ---------------------------------------------------------------------------
+def lookup_selectbox(label, list_name, session_key, key_prefix, placeholder=""):
+    """Render a selectbox backed by a persisted lookup list.
+    Shows existing entries + '+ Add new...' option.
+    Returns the selected value (str).
+    """
+    items = data_manager.get_lookup(list_name)
+    current = st.session_state.get(session_key, "")
+
+    options = [""] + items + ["+ Add new..."]
+    if current in items:
+        default_idx = items.index(current) + 1
+    else:
+        default_idx = 0
+
+    selected = st.selectbox(
+        label, options=options,
+        index=default_idx,
+        format_func=lambda x: placeholder if x == "" else x,
+        key=f"{key_prefix}_sel",
+    )
+
+    if selected == "+ Add new...":
+        new_val = st.text_input(
+            f"New {label.lower()}", placeholder=placeholder,
+            key=f"{key_prefix}_new",
+        )
+        if new_val and new_val.strip():
+            new_val = new_val.strip()
+            if st.button("Add", key=f"{key_prefix}_add_btn", use_container_width=True):
+                data_manager.add_to_lookup(list_name, new_val)
+                st.session_state[session_key] = new_val
+                st.rerun()
+        return st.session_state.get(session_key, "")
+    else:
+        st.session_state[session_key] = selected or ""
+        return selected or ""
+
+
+# ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
 def render_header():
@@ -311,38 +352,69 @@ def page_select():
         )
     else:
         match_name = match_choice
-        # Load fighter names from match group
+        # Load fighter names + details from match group
         mdata = data_manager.load_matches().get(match_name, {})
         if mdata.get("red_name") and not st.session_state.get("red_fighter_name"):
             st.session_state["red_fighter_name"] = mdata["red_name"]
         if mdata.get("blue_name") and not st.session_state.get("blue_fighter_name"):
             st.session_state["blue_fighter_name"] = mdata["blue_name"]
+        for _field, _ss_key in [
+            ("red_country", "red_country"), ("blue_country", "blue_country"),
+            ("weight", "match_weight"), ("championship", "match_championship"),
+            ("date", "match_date"), ("result", "match_result"),
+        ]:
+            if mdata.get(_field) and not st.session_state.get(_ss_key):
+                st.session_state[_ss_key] = mdata[_field]
 
     st.session_state["match_name"] = match_name
 
-    # Fighter name labels
-    st.markdown('<p class="section-label">Fighter Names</p>', unsafe_allow_html=True)
+    # Fighter names (persisted athlete list)
+    st.markdown('<p class="section-label">Fighters</p>', unsafe_allow_html=True)
     fc1, fc2 = st.columns(2)
     with fc1:
-        red_name = st.text_input(
-            "RED fighter",
-            value=st.session_state.get("red_fighter_name", ""),
-            placeholder="e.g. Dunya",
-            label_visibility="collapsed",
-        )
-        st.markdown('<span style="color:#dc3545; font-size:0.8rem;">RED (Hong)</span>',
+        st.markdown('<span style="color:#dc3545; font-size:0.8rem; font-weight:600;">RED (Hong)</span>',
                     unsafe_allow_html=True)
-        st.session_state["red_fighter_name"] = red_name
+        red_name = lookup_selectbox("RED athlete", "athletes", "red_fighter_name",
+                                     "sel_red_ath", placeholder="Select athlete...")
     with fc2:
-        blue_name = st.text_input(
-            "BLUE fighter",
-            value=st.session_state.get("blue_fighter_name", ""),
-            placeholder="e.g. Opponent",
-            label_visibility="collapsed",
-        )
-        st.markdown('<span style="color:#0077B6; font-size:0.8rem;">BLUE (Chung)</span>',
+        st.markdown('<span style="color:#0077B6; font-size:0.8rem; font-weight:600;">BLUE (Chung)</span>',
                     unsafe_allow_html=True)
-        st.session_state["blue_fighter_name"] = blue_name
+        blue_name = lookup_selectbox("BLUE athlete", "athletes", "blue_fighter_name",
+                                      "sel_blue_ath", placeholder="Select athlete...")
+
+    # Countries
+    cc1, cc2 = st.columns(2)
+    with cc1:
+        red_country = lookup_selectbox("RED country", "countries", "red_country",
+                                        "sel_red_cty", placeholder="Country...")
+    with cc2:
+        blue_country = lookup_selectbox("BLUE country", "countries", "blue_country",
+                                         "sel_blue_cty", placeholder="Country...")
+
+    # Championship + Weight + Date + Result
+    with st.expander("Competition Details"):
+        championship = lookup_selectbox("Championship", "championships",
+                                         "match_championship", "sel_champ",
+                                         placeholder="e.g. Asian Games 2023")
+        wd1, wd2 = st.columns(2)
+        with wd1:
+            weight = st.text_input("Weight", value=st.session_state.get("match_weight", ""),
+                                    placeholder="e.g. -49kg", key="sel_weight_input")
+            st.session_state["match_weight"] = weight
+        with wd2:
+            match_date = st.text_input("Date / Year",
+                                        value=st.session_state.get("match_date", ""),
+                                        placeholder="e.g. 2024", key="sel_date_input")
+            st.session_state["match_date"] = match_date
+        result = st.selectbox(
+            "Result",
+            options=["Unknown", "RED Won", "BLUE Won", "Draw"],
+            index=["Unknown", "RED Won", "BLUE Won", "Draw"].index(
+                st.session_state.get("match_result", "Unknown")
+            ),
+            key="sel_result_input",
+        )
+        st.session_state["match_result"] = result
 
     # Start time filter
     st.markdown('<p class="section-label">Skip start (seconds)</p>', unsafe_allow_html=True)
@@ -384,11 +456,25 @@ def page_select():
                 if not st.session_state["annotator_name"]:
                     st.error("Please select or enter your name first")
                 else:
+                    # Auto-add athletes/championship to lookup lists
+                    if red_name:
+                        data_manager.add_to_lookup("athletes", red_name)
+                    if blue_name:
+                        data_manager.add_to_lookup("athletes", blue_name)
+                    champ_val = st.session_state.get("match_championship", "")
+                    if champ_val:
+                        data_manager.add_to_lookup("championships", champ_val)
                     # Save match group
                     if match_name:
                         data_manager.save_match_group(
                             match_name, video, part_num,
                             red_name=red_name, blue_name=blue_name,
+                            red_country=st.session_state.get("red_country", ""),
+                            blue_country=st.session_state.get("blue_country", ""),
+                            weight=st.session_state.get("match_weight", ""),
+                            championship=champ_val,
+                            date=st.session_state.get("match_date", ""),
+                            result=st.session_state.get("match_result", ""),
                         )
                     st.session_state["video_stem"] = video
                     st.session_state["video_part"] = part_num
@@ -497,26 +583,28 @@ def page_annotate():
     with st.expander("Match Details", expanded=False):
         md1, md2 = st.columns(2)
         with md1:
-            red_edit = st.text_input(
-                "RED fighter", value=st.session_state.get("red_fighter_name", ""),
-                key="edit_red_name",
-            )
-            st.session_state["red_fighter_name"] = red_edit
+            red_edit = lookup_selectbox("RED athlete", "athletes", "red_fighter_name",
+                                         "edit_red_ath", placeholder="Select athlete...")
         with md2:
-            blue_edit = st.text_input(
-                "BLUE fighter", value=st.session_state.get("blue_fighter_name", ""),
-                key="edit_blue_name",
-            )
-            st.session_state["blue_fighter_name"] = blue_edit
+            blue_edit = lookup_selectbox("BLUE athlete", "athletes", "blue_fighter_name",
+                                          "edit_blue_ath", placeholder="Select athlete...")
 
         md3, md4 = st.columns(2)
         with md3:
+            red_cty = lookup_selectbox("RED country", "countries", "red_country",
+                                        "edit_red_cty", placeholder="Country...")
+        with md4:
+            blue_cty = lookup_selectbox("BLUE country", "countries", "blue_country",
+                                         "edit_blue_cty", placeholder="Country...")
+
+        md5, md6 = st.columns(2)
+        with md5:
             match_edit = st.text_input(
                 "Match name", value=st.session_state.get("match_name", ""),
                 key="edit_match_name",
             )
             st.session_state["match_name"] = match_edit
-        with md4:
+        with md6:
             part_edit = st.selectbox(
                 "Part", options=[1, 2, 3, 4, 5],
                 index=st.session_state.get("video_part", 1) - 1,
@@ -524,11 +612,28 @@ def page_annotate():
             )
             st.session_state["video_part"] = part_edit
 
+        champ_edit = lookup_selectbox("Championship", "championships",
+                                       "match_championship", "edit_champ",
+                                       placeholder="e.g. Asian Games 2023")
+
         if st.button("Save match details", use_container_width=True):
             if match_edit:
+                # Auto-add athletes to lookup list
+                if red_edit:
+                    data_manager.add_to_lookup("athletes", red_edit)
+                if blue_edit:
+                    data_manager.add_to_lookup("athletes", blue_edit)
+                if champ_edit:
+                    data_manager.add_to_lookup("championships", champ_edit)
                 data_manager.save_match_group(
                     match_edit, video_stem, part_edit,
                     red_name=red_edit, blue_name=blue_edit,
+                    red_country=st.session_state.get("red_country", ""),
+                    blue_country=st.session_state.get("blue_country", ""),
+                    weight=st.session_state.get("match_weight", ""),
+                    championship=st.session_state.get("match_championship", ""),
+                    date=st.session_state.get("match_date", ""),
+                    result=st.session_state.get("match_result", ""),
                 )
                 st.success("Match details saved")
 

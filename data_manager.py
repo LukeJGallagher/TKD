@@ -357,3 +357,62 @@ def list_match_names() -> list:
     """List all existing match group names."""
     matches = load_matches()
     return sorted(matches.keys())
+
+
+# ---------------------------------------------------------------------------
+# Persisted lookup lists — athletes, countries, championships
+# ---------------------------------------------------------------------------
+_LISTS_FILE = ANNOTATIONS_DIR / "_lookup_lists.json"
+
+# ISO 3166-1 alpha-3 country codes (common in TKD)
+DEFAULT_COUNTRIES = [
+    "KSA", "KOR", "CHN", "JPN", "TUR", "IRN", "UZB", "THA", "GBR",
+    "USA", "FRA", "GER", "ITA", "ESP", "RUS", "MEX", "BRA", "CIV",
+    "JOR", "EGY", "MAR", "TUN", "AUS", "CAN", "COL", "CRO", "CUB",
+    "GRE", "HUN", "IND", "INA", "KAZ", "MGL", "NIG", "PHI", "POL",
+    "SRB", "SWE", "TPE", "VIE",
+]
+
+
+def load_lookup_lists() -> Dict:
+    """Load persisted lookup lists (athletes, countries, championships)."""
+    ANNOTATIONS_DIR.mkdir(parents=True, exist_ok=True)
+    if _LISTS_FILE.exists():
+        try:
+            with open(_LISTS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "athletes": [],
+        "countries": DEFAULT_COUNTRIES[:],
+        "championships": [],
+    }
+
+
+def save_lookup_lists(lists: Dict):
+    """Save persisted lookup lists."""
+    ANNOTATIONS_DIR.mkdir(parents=True, exist_ok=True)
+    with open(_LISTS_FILE, "w", encoding="utf-8") as f:
+        json.dump(lists, f, indent=2, ensure_ascii=False)
+
+
+def add_to_lookup(list_name: str, value: str) -> List[str]:
+    """Add a value to a lookup list if not already present. Returns updated list."""
+    if not value or not value.strip():
+        return get_lookup(list_name)
+    value = value.strip()
+    lists = load_lookup_lists()
+    items = lists.get(list_name, [])
+    if value not in items:
+        items.append(value)
+        items.sort()
+        lists[list_name] = items
+        save_lookup_lists(lists)
+    return items
+
+
+def get_lookup(list_name: str) -> List[str]:
+    """Get a lookup list by name."""
+    lists = load_lookup_lists()
+    return lists.get(list_name, [])
