@@ -384,40 +384,6 @@ def page_select():
         blue_name = lookup_selectbox("BLUE athlete", "athletes", "blue_fighter_name",
                                       "sel_blue_ath", placeholder="Select athlete...")
 
-    # Countries
-    cc1, cc2 = st.columns(2)
-    with cc1:
-        red_country = lookup_selectbox("RED country", "countries", "red_country",
-                                        "sel_red_cty", placeholder="Country...")
-    with cc2:
-        blue_country = lookup_selectbox("BLUE country", "countries", "blue_country",
-                                         "sel_blue_cty", placeholder="Country...")
-
-    # Championship + Weight + Date + Result
-    with st.expander("Competition Details"):
-        championship = lookup_selectbox("Championship", "championships",
-                                         "match_championship", "sel_champ",
-                                         placeholder="e.g. Asian Games 2023")
-        wd1, wd2 = st.columns(2)
-        with wd1:
-            weight = st.text_input("Weight", value=st.session_state.get("match_weight", ""),
-                                    placeholder="e.g. -49kg", key="sel_weight_input")
-            st.session_state["match_weight"] = weight
-        with wd2:
-            match_date = st.text_input("Date / Year",
-                                        value=st.session_state.get("match_date", ""),
-                                        placeholder="e.g. 2024", key="sel_date_input")
-            st.session_state["match_date"] = match_date
-        result = st.selectbox(
-            "Result",
-            options=["Unknown", "RED Won", "BLUE Won", "Draw"],
-            index=["Unknown", "RED Won", "BLUE Won", "Draw"].index(
-                st.session_state.get("match_result", "Unknown")
-            ),
-            key="sel_result_input",
-        )
-        st.session_state["match_result"] = result
-
     # Start time filter
     st.markdown('<p class="section-label">Skip start (seconds)</p>', unsafe_allow_html=True)
     start_sec = st.slider("start_filter", 0, 120, 0, 5,
@@ -614,9 +580,30 @@ def page_annotate():
             )
             st.session_state["video_part"] = part_edit
 
-        champ_edit = lookup_selectbox("Championship", "championships",
-                                       "match_championship", "edit_champ",
-                                       placeholder="e.g. Asian Games 2023")
+        with st.expander("Competition Details"):
+            champ_edit = lookup_selectbox("Championship", "championships",
+                                           "match_championship", "edit_champ",
+                                           placeholder="e.g. Asian Games 2023")
+            wd1, wd2 = st.columns(2)
+            with wd1:
+                weight = st.text_input("Weight",
+                                       value=st.session_state.get("match_weight", ""),
+                                       placeholder="e.g. -49kg", key="edit_weight_input")
+                st.session_state["match_weight"] = weight
+            with wd2:
+                match_date = st.text_input("Date / Year",
+                                           value=st.session_state.get("match_date", ""),
+                                           placeholder="e.g. 2024", key="edit_date_input")
+                st.session_state["match_date"] = match_date
+            result = st.selectbox(
+                "Result",
+                options=["Unknown", "RED Won", "BLUE Won", "Draw"],
+                index=["Unknown", "RED Won", "BLUE Won", "Draw"].index(
+                    st.session_state.get("match_result", "Unknown")
+                ),
+                key="edit_result_input",
+            )
+            st.session_state["match_result"] = result
 
         if st.button("Save match details", use_container_width=True):
             if match_edit:
@@ -792,7 +779,7 @@ def page_annotate():
         """, unsafe_allow_html=True)
     with ai_col2:
         if st.button("Incorrect", key=f"incorrect_ai_{idx}",
-                      help="Mark AI prediction as wrong (saves as false positive for training)"):
+                      help="Mark AI prediction as wrong — stays on event so you can annotate"):
             data_manager.add_annotation(
                 video_stem=video_stem,
                 event=event,
@@ -803,9 +790,6 @@ def page_annotate():
                 },
                 annotated_by=st.session_state.get("annotator_name", ""),
             )
-            # Move to next
-            if pos_in_filter < filter_total - 1:
-                st.session_state["event_idx"] = filtered_indices[pos_in_filter + 1]
             st.rerun()
 
     # ── Scoreboard (source of truth) ──
