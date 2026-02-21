@@ -230,33 +230,14 @@ init_state()
 
 
 # ---------------------------------------------------------------------------
-# Header with logo
+# Header
 # ---------------------------------------------------------------------------
-import base64
-
-@st.cache_data
-def _load_logo_b64():
-    logo_path = Path(__file__).parent / "logo.png"
-    if logo_path.exists():
-        return base64.b64encode(logo_path.read_bytes()).decode()
-    return None
-
 def render_header():
-    logo_b64 = _load_logo_b64()
-    logo_html = ""
-    if logo_b64:
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 40px; margin-right: 10px; vertical-align: middle;">'
-    st.markdown(f"""
+    st.markdown("""
     <div style="background: linear-gradient(135deg, #235036 0%, #18342a 100%);
-         padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; text-align: center;
-         border-bottom: 3px solid #ebce83;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-            {logo_html}
-            <div>
-                <h2 style="color: white; margin: 0; font-size: 1.3rem;">TKD Match Annotation</h2>
-                <p style="color: #ebce83; margin: 2px 0 0 0; font-size: 0.85rem;">Team Saudi Performance Analysis</p>
-            </div>
-        </div>
+         padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; text-align: center;">
+        <h2 style="color: white; margin: 0; font-size: 1.3rem;">TKD Match Annotation</h2>
+        <p style="color: #ebce83; margin: 2px 0 0 0; font-size: 0.85rem;">Team Saudi</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -313,94 +294,55 @@ def page_select():
         """)
         return
 
-    # ── Auto-group videos by match ──
-    import re
-
-    def _parse_match(stem):
-        """Extract base match name and part number from filename."""
-        # Pattern: ends with _1, _2, etc. or (1), (2)
-        m = re.match(r'^(.+?)[\s_]*\((\d+)\)$', stem)
-        if m:
-            return m.group(1).strip(), int(m.group(2))
-        m = re.match(r'^(.+?)_(\d+)$', stem)
-        if m:
-            return m.group(1).strip(), int(m.group(2))
-        return stem, 1
-
-    def _clean_name(base):
-        """Make a readable display name from the base filename."""
-        name = base
-        # Remove date prefix like 20251116-
-        name = re.sub(r'^\d{8}-', '', name)
-        # Remove "Taekwondo_" prefix
-        name = re.sub(r'^Taekwondo_', '', name)
-        # Replace underscores with spaces
-        name = name.replace('_', ' ')
-        # Clean up multiple spaces
-        name = re.sub(r'\s+', ' ', name).strip()
-        return name
-
-    # Group videos: {base_name: [(stem, part_num), ...]}
-    match_groups = {}
-    for v in videos:
-        base, part = _parse_match(v)
-        if base not in match_groups:
-            match_groups[base] = []
-        match_groups[base].append((v, part))
-
-    # Sort parts within each group
-    for base in match_groups:
-        match_groups[base].sort(key=lambda x: x[1])
-
-    # ── Match selector ──
-    st.markdown('<p class="section-label">Select match</p>', unsafe_allow_html=True)
-    base_names = list(match_groups.keys())
-    display_names = [_clean_name(b) for b in base_names]
-    selected_idx = st.selectbox(
-        "match_select", options=range(len(base_names)),
-        format_func=lambda i: display_names[i],
-        key="match_selector", label_visibility="collapsed",
+    # ── Match group (link multiple videos to one match) ──
+    st.markdown('<p class="section-label">Match</p>', unsafe_allow_html=True)
+    existing_matches = data_manager.list_match_names()
+    match_options = ["(New match)"] + existing_matches
+    match_choice = st.selectbox(
+        "match_group", options=match_options,
+        index=0, label_visibility="collapsed",
+        help="Group multiple videos as parts of the same match",
     )
-    selected_base = base_names[selected_idx]
-    parts = match_groups[selected_base]
-
-    # Load existing match data
-    match_name = st.session_state.get("match_name", "") or _clean_name(selected_base)
-    mdata = data_manager.load_matches().get(match_name, {})
-    if mdata.get("red_name") and not st.session_state.get("red_fighter_name"):
-        st.session_state["red_fighter_name"] = mdata["red_name"]
-    if mdata.get("blue_name") and not st.session_state.get("blue_fighter_name"):
-        st.session_state["blue_fighter_name"] = mdata["blue_name"]
-
-    # ── Match details (editable) ──
-    with st.expander("Match Details", expanded=len(parts) > 1):
+    if match_choice == "(New match)":
         match_name = st.text_input(
-            "Match name", value=match_name,
+            "Match name",
+            value=st.session_state.get("match_name", ""),
             placeholder="e.g. Dunya vs CHN - Semi Final",
-            key="sel_match_name",
         )
-        st.session_state["match_name"] = match_name
+    else:
+        match_name = match_choice
+        # Load fighter names from match group
+        mdata = data_manager.load_matches().get(match_name, {})
+        if mdata.get("red_name") and not st.session_state.get("red_fighter_name"):
+            st.session_state["red_fighter_name"] = mdata["red_name"]
+        if mdata.get("blue_name") and not st.session_state.get("blue_fighter_name"):
+            st.session_state["blue_fighter_name"] = mdata["blue_name"]
 
-        fc1, fc2 = st.columns(2)
-        with fc1:
-            red_name = st.text_input(
-                "RED (Hong)",
-                value=st.session_state.get("red_fighter_name", ""),
-                placeholder="e.g. Dunya",
-                key="sel_red_name",
-            )
-            st.session_state["red_fighter_name"] = red_name
-        with fc2:
-            blue_name = st.text_input(
-                "BLUE (Chung)",
-                value=st.session_state.get("blue_fighter_name", ""),
-                placeholder="e.g. Opponent",
-                key="sel_blue_name",
-            )
-            st.session_state["blue_fighter_name"] = blue_name
+    st.session_state["match_name"] = match_name
 
-        if len(parts) > 1:
-            st.success(f"{len(parts)} parts auto-grouped for this match")
+    # Fighter name labels
+    st.markdown('<p class="section-label">Fighter Names</p>', unsafe_allow_html=True)
+    fc1, fc2 = st.columns(2)
+    with fc1:
+        red_name = st.text_input(
+            "RED fighter",
+            value=st.session_state.get("red_fighter_name", ""),
+            placeholder="e.g. Dunya",
+            label_visibility="collapsed",
+        )
+        st.markdown('<span style="color:#dc3545; font-size:0.8rem;">RED (Hong)</span>',
+                    unsafe_allow_html=True)
+        st.session_state["red_fighter_name"] = red_name
+    with fc2:
+        blue_name = st.text_input(
+            "BLUE fighter",
+            value=st.session_state.get("blue_fighter_name", ""),
+            placeholder="e.g. Opponent",
+            label_visibility="collapsed",
+        )
+        st.markdown('<span style="color:#0077B6; font-size:0.8rem;">BLUE (Chung)</span>',
+                    unsafe_allow_html=True)
+        st.session_state["blue_fighter_name"] = blue_name
 
     # Start time filter
     st.markdown('<p class="section-label">Skip start (seconds)</p>', unsafe_allow_html=True)
@@ -408,40 +350,51 @@ def page_select():
                           label_visibility="collapsed",
                           help="Skip events before this time (walkouts, ceremonies)")
 
-    # ── Parts list ──
-    st.markdown('<p class="section-label">Parts</p>', unsafe_allow_html=True)
+    # ── Video list with part numbers ──
+    st.markdown('<p class="section-label">Select match video</p>', unsafe_allow_html=True)
 
-    for video_stem, part_num in parts:
-        techniques = data_manager.load_techniques(video_stem)
+    for video in videos:
+        techniques = data_manager.load_techniques(video)
         if start_sec > 0:
             techniques = [e for e in techniques if e.get("start_timestamp", 0) >= start_sec]
-        stats = data_manager.get_annotation_stats(video_stem, len(techniques))
+        stats = data_manager.get_annotation_stats(video, len(techniques))
 
-        col1, col2 = st.columns([4, 1])
+        # Check if this video already belongs to a match
+        vm = data_manager.get_match_for_video(video)
+        part_default = vm["video_part"] if vm else 1
+        match_label = f" [{vm['match_name']} Pt.{vm['video_part']}]" if vm else ""
+
+        col1, col2, col3 = st.columns([3, 1, 1])
         with col1:
-            part_label = f"Part {part_num}" if len(parts) > 1 else "Full match"
-            st.markdown(f"**{part_label}**")
+            st.markdown(f"**{video}**{match_label}")
             st.markdown(f"<div class='progress-bar'>"
                        f"<div class='progress-fill' style='width:{stats['progress_pct']}%'></div>"
                        f"</div>", unsafe_allow_html=True)
             st.caption(f"{stats['annotated']}/{stats['total_events']} events "
                       f"({stats['progress_pct']}%)")
         with col2:
-            if st.button("Open", key=f"open_{video_stem}", use_container_width=True):
+            part_num = st.selectbox(
+                "Pt", options=[1, 2, 3, 4, 5],
+                index=part_default - 1,
+                key=f"part_{video}",
+                label_visibility="collapsed",
+            )
+        with col3:
+            if st.button("Open", key=f"open_{video}", use_container_width=True):
                 if not st.session_state["annotator_name"]:
                     st.error("Please select or enter your name first")
                 else:
                     # Save match group
                     if match_name:
                         data_manager.save_match_group(
-                            match_name, video_stem, part_num,
+                            match_name, video, part_num,
                             red_name=red_name, blue_name=blue_name,
                         )
-                    st.session_state["video_stem"] = video_stem
+                    st.session_state["video_stem"] = video
                     st.session_state["video_part"] = part_num
                     st.session_state["events"] = techniques
                     st.session_state["start_sec"] = start_sec
-                    st.session_state["event_idx"] = _find_next_unannotated(video_stem, techniques)
+                    st.session_state["event_idx"] = _find_next_unannotated(video, techniques)
                     st.session_state["page"] = "annotate"
                     st.rerun()
 
@@ -633,13 +586,12 @@ def page_annotate():
 
     st.markdown("---")
 
-    # ── Thumbnail with skeleton overlay ──
+    # ── Thumbnail ──
     start_frame = event.get("start_frame", 0)
     thumb_path = data_manager.get_thumbnail_path(video_stem, start_frame)
     if thumb_path:
         img = Image.open(thumb_path)
-        st.image(img, use_container_width=True,
-                 caption=f"Frame {start_frame} (skeleton + target zones)")
+        st.image(img, use_container_width=True)
     else:
         st.markdown(
             f"<div style='background:#e9ecef; padding:40px; text-align:center; "
@@ -712,33 +664,15 @@ def page_annotate():
     existing_red = _find_existing("red")
     existing_blue = _find_existing("blue")
 
-    # AI badge + timestamp + dismiss
-    ai_col1, ai_col2 = st.columns([5, 1])
-    with ai_col1:
-        st.markdown(f"""
-        <div class="ai-badge">
-            AI: <strong>{ai_display}</strong>
-            &nbsp;&middot;&nbsp; {confidence:.0%}
-            &nbsp;&middot;&nbsp; {fighter.upper()}
-            &nbsp;&middot;&nbsp; {mins}:{secs:02d}
-        </div>
-        """, unsafe_allow_html=True)
-    with ai_col2:
-        if st.button("X", key=f"dismiss_ai_{idx}", help="Dismiss AI prediction (false positive)"):
-            # Mark as false positive — skip to next event
-            data_manager.add_annotation(
-                video_stem=video_stem,
-                event=event,
-                corrections={
-                    "technique": "neutral_stance",
-                    "fighter_color": fighter,
-                    "notes": "Dismissed as false positive",
-                },
-                annotated_by=st.session_state.get("annotator_name", ""),
-            )
-            # Move to next
-            st.session_state["event_idx"] = min(idx + 1, len(events) - 1)
-            st.rerun()
+    # AI badge + timestamp
+    st.markdown(f"""
+    <div class="ai-badge">
+        AI: <strong>{ai_display}</strong>
+        &nbsp;&middot;&nbsp; {confidence:.0%}
+        &nbsp;&middot;&nbsp; {fighter.upper()}
+        &nbsp;&middot;&nbsp; {mins}:{secs:02d}
+    </div>
+    """, unsafe_allow_html=True)
 
     # ── Scoreboard (source of truth) ──
     sb_key = f"sb_{video_stem}"
@@ -997,26 +931,21 @@ def page_annotate():
             unsafe_allow_html=True,
         )
 
-    # ── Filmstrip (scrollable + zoom) ──
+    # ── Filmstrip (scrollable) ──
     strip_path = data_manager.THUMBNAILS_DIR / video_stem / "strips" / f"strip_{start_frame:06d}.jpg"
     if strip_path.exists():
-        fs_col1, fs_col2 = st.columns([3, 1])
-        with fs_col1:
-            st.markdown('<p class="section-label">Filmstrip</p>', unsafe_allow_html=True)
-        with fs_col2:
-            zoomed = st.checkbox("Zoom", value=False, key=f"strip_zoom_{idx}")
+        st.markdown('<p class="section-label">Filmstrip</p>', unsafe_allow_html=True)
         import base64
         with open(strip_path, "rb") as sf:
             strip_b64 = base64.b64encode(sf.read()).decode()
         sf_start = event.get('start_frame', '?')
         sf_end = event.get('end_frame', '?')
-        strip_height = "200px" if zoomed else "80px"
         st.markdown(f"""
         <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;
              border:1px solid #e0e0e0; border-radius:8px; padding:4px;
              margin:4px 0; white-space:nowrap;">
             <img src="data:image/jpeg;base64,{strip_b64}"
-                 style="height:{strip_height}; max-width:none; display:block;">
+                 style="height:80px; max-width:none; display:block;">
         </div>
         <p style="font-size:0.7rem; color:#999; text-align:center; margin:2px 0;">
             Frames {sf_start} - {sf_end}
