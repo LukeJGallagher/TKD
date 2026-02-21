@@ -335,55 +335,6 @@ def page_select():
         """)
         return
 
-    # ── Match group (link multiple videos to one match) ──
-    st.markdown('<p class="section-label">Match</p>', unsafe_allow_html=True)
-    existing_matches = data_manager.list_match_names()
-    match_options = ["(New match)"] + existing_matches
-    match_choice = st.selectbox(
-        "match_group", options=match_options,
-        index=0, label_visibility="collapsed",
-        help="Group multiple videos as parts of the same match",
-    )
-    if match_choice == "(New match)":
-        # Default to first video name if no match name set
-        _default_name = st.session_state.get("match_name", "") or (videos[0] if videos else "")
-        match_name = st.text_input(
-            "Match name",
-            value=_default_name,
-            placeholder="e.g. Dunya vs CHN - Semi Final",
-        )
-    else:
-        match_name = match_choice
-        # Load fighter names + details from match group
-        mdata = data_manager.load_matches().get(match_name, {})
-        if mdata.get("red_name") and not st.session_state.get("red_fighter_name"):
-            st.session_state["red_fighter_name"] = mdata["red_name"]
-        if mdata.get("blue_name") and not st.session_state.get("blue_fighter_name"):
-            st.session_state["blue_fighter_name"] = mdata["blue_name"]
-        for _field, _ss_key in [
-            ("red_country", "red_country"), ("blue_country", "blue_country"),
-            ("weight", "match_weight"), ("championship", "match_championship"),
-            ("date", "match_date"), ("result", "match_result"),
-        ]:
-            if mdata.get(_field) and not st.session_state.get(_ss_key):
-                st.session_state[_ss_key] = mdata[_field]
-
-    st.session_state["match_name"] = match_name
-
-    # Fighter names (persisted athlete list)
-    st.markdown('<p class="section-label">Fighters</p>', unsafe_allow_html=True)
-    fc1, fc2 = st.columns(2)
-    with fc1:
-        st.markdown('<span style="color:#dc3545; font-size:0.8rem; font-weight:600;">RED (Hong)</span>',
-                    unsafe_allow_html=True)
-        red_name = lookup_selectbox("RED athlete", "athletes", "red_fighter_name",
-                                     "sel_red_ath", placeholder="Select athlete...")
-    with fc2:
-        st.markdown('<span style="color:#0077B6; font-size:0.8rem; font-weight:600;">BLUE (Chung)</span>',
-                    unsafe_allow_html=True)
-        blue_name = lookup_selectbox("BLUE athlete", "athletes", "blue_fighter_name",
-                                      "sel_blue_ath", placeholder="Select athlete...")
-
     # Start time filter
     st.markdown('<p class="section-label">Skip start (seconds)</p>', unsafe_allow_html=True)
     start_sec = st.slider("start_filter", 0, 120, 0, 5,
@@ -424,26 +375,24 @@ def page_select():
                 if not st.session_state["annotator_name"]:
                     st.error("Please select or enter your name first")
                 else:
-                    # Auto-add athletes/championship to lookup lists
-                    if red_name:
-                        data_manager.add_to_lookup("athletes", red_name)
-                    if blue_name:
-                        data_manager.add_to_lookup("athletes", blue_name)
-                    champ_val = st.session_state.get("match_championship", "")
-                    if champ_val:
-                        data_manager.add_to_lookup("championships", champ_val)
-                    # Save match group
-                    if match_name:
-                        data_manager.save_match_group(
-                            match_name, video, part_num,
-                            red_name=red_name, blue_name=blue_name,
-                            red_country=st.session_state.get("red_country", ""),
-                            blue_country=st.session_state.get("blue_country", ""),
-                            weight=st.session_state.get("match_weight", ""),
-                            championship=champ_val,
-                            date=st.session_state.get("match_date", ""),
-                            result=st.session_state.get("match_result", ""),
-                        )
+                    # Load existing match info for this video
+                    vm = data_manager.get_match_for_video(video)
+                    if vm:
+                        mdata = data_manager.load_matches().get(vm["match_name"], {})
+                        st.session_state["match_name"] = vm["match_name"]
+                        if mdata.get("red_name"):
+                            st.session_state["red_fighter_name"] = mdata["red_name"]
+                        if mdata.get("blue_name"):
+                            st.session_state["blue_fighter_name"] = mdata["blue_name"]
+                        for _field, _ss_key in [
+                            ("red_country", "red_country"), ("blue_country", "blue_country"),
+                            ("weight", "match_weight"), ("championship", "match_championship"),
+                            ("date", "match_date"), ("result", "match_result"),
+                        ]:
+                            if mdata.get(_field):
+                                st.session_state[_ss_key] = mdata[_field]
+                    else:
+                        st.session_state["match_name"] = video
                     st.session_state["video_stem"] = video
                     st.session_state["video_part"] = part_num
                     st.session_state["events"] = techniques
