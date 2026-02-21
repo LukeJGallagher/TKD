@@ -345,9 +345,11 @@ def page_select():
         help="Group multiple videos as parts of the same match",
     )
     if match_choice == "(New match)":
+        # Default to first video name if no match name set
+        _default_name = st.session_state.get("match_name", "") or (videos[0] if videos else "")
         match_name = st.text_input(
             "Match name",
-            value=st.session_state.get("match_name", ""),
+            value=_default_name,
             placeholder="e.g. Dunya vs CHN - Semi Final",
         )
     else:
