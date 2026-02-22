@@ -1,0 +1,46 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\AG2023 Taekwondo W49kg Dunya vs KOR.mp4",
+    "resolution": "1280x720",
+    "fps": 60.000009559850156,
+    "total_frames": 50210,
+    "duration_seconds": 836.83
+  },
+  "processing": {
+    "frames_processed": 50210,
+    "frame_skip": 1,
+    "processing_time_seconds": 11178.27,
+    "avg_fps": 4.49
+  },
+  "broadcast": {
+    "camera_cuts": 79,
+    "live_frames": 27751,
+    "skipped_frames": 11595,
+    "live_segments": 512,
+    "avg_histogram_correlation": 0.994
+  },
+  "detections": {
+    "total_fighter_detections": 103810,
+    "red_fighter_detections": 38057,
+    "blue_fighter_detections": 31530,
+    "frames_with_both_fighters": 33281
+  },
+  "techniques": {
+    "total_events": 678,
+    "active_techniques": 678,
+    "red_techniques": 436,
+    "blue_techniques": 242,
+    "red_estimated_score": 1308,
+    "blue_estimated_score": 644,
+    "technique_distribution": {
+      "Front Kick": 47,
+      "Spin Hook": 113,
+      "Side Kick": 21,
+      "Axe Kick": 291,
+      "Block": 59,
+      "Back Kick": 53,
+      "Punch": 94
+    },
+    "classifier_tier": "rule_based"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\Taekwondo_Batamweight49-53kg_Dunya-vs-SOM_Round1_09082022.mp4",
+    "resolution": "1920x1080",
+    "fps": 30.010003376321066,
+    "total_frames": 10981,
+    "duration_seconds": 365.91
+  },
+  "processing": {
+    "frames_processed": 10981,
+    "frame_skip": 1,
+    "processing_time_seconds": 2538.22,
+    "avg_fps": 4.33
+  },
+  "broadcast": {
+    "camera_cuts": 0,
+    "live_frames": 5,
+    "skipped_frames": 10976,
+    "live_segments": 5,
+    "avg_histogram_correlation": 0.997
+  },
+  "detections": {
+    "total_fighter_detections": 183,
+    "red_fighter_detections": 4,
+    "blue_fighter_detections": 1,
+    "frames_with_both_fighters": 5
+  },
+  "techniques": {
+    "total_events": 0,
+    "active_techniques": 0,
+    "red_techniques": 0,
+    "blue_techniques": 0,
+    "red_estimated_score": 0,
+    "blue_estimated_score": 0,
+    "technique_distribution": {},
+    "classifier_tier": "none"
+  }
+}

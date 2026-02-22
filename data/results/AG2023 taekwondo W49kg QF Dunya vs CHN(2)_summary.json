@@ -1,0 +1,46 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\AG2023 taekwondo W49kg QF Dunya vs CHN(2).mp4",
+    "resolution": "1280x720",
+    "fps": 59.999987093307425,
+    "total_frames": 37190,
+    "duration_seconds": 619.83
+  },
+  "processing": {
+    "frames_processed": 37190,
+    "frame_skip": 1,
+    "processing_time_seconds": 9369.28,
+    "avg_fps": 3.97
+  },
+  "broadcast": {
+    "camera_cuts": 67,
+    "live_frames": 20442,
+    "skipped_frames": 6988,
+    "live_segments": 317,
+    "avg_histogram_correlation": 0.993
+  },
+  "detections": {
+    "total_fighter_detections": 84384,
+    "red_fighter_detections": 34735,
+    "blue_fighter_detections": 20396,
+    "frames_with_both_fighters": 25930
+  },
+  "techniques": {
+    "total_events": 705,
+    "active_techniques": 705,
+    "red_techniques": 507,
+    "blue_techniques": 198,
+    "red_estimated_score": 1653,
+    "blue_estimated_score": 613,
+    "technique_distribution": {
+      "Block": 35,
+      "Spin Hook": 156,
+      "Axe Kick": 302,
+      "Back Kick": 82,
+      "Side Kick": 27,
+      "Front Kick": 17,
+      "Punch": 86
+    },
+    "classifier_tier": "rule_based"
+  }
+}

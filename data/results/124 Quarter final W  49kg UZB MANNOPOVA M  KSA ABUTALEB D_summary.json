@@ -1,0 +1,46 @@
+{
+  "video": {
+    "path": "C:\\Users\\l.gallagher\\OneDrive - Team Saudi\\Documents\\Performance Analysis\\taekwondo_pose_detection\\data\\raw\\124 Quarter final W  49kg UZB MANNOPOVA M  KSA ABUTALEB D.mp4",
+    "resolution": "1920x1080",
+    "fps": 25.0,
+    "total_frames": 29332,
+    "duration_seconds": 1173.28
+  },
+  "processing": {
+    "frames_processed": 29332,
+    "frame_skip": 1,
+    "processing_time_seconds": 7161.48,
+    "avg_fps": 4.1
+  },
+  "broadcast": {
+    "camera_cuts": 0,
+    "live_frames": 5500,
+    "skipped_frames": 13648,
+    "live_segments": 433,
+    "avg_histogram_correlation": 0.992
+  },
+  "detections": {
+    "total_fighter_detections": 38358,
+    "red_fighter_detections": 18597,
+    "blue_fighter_detections": 7375,
+    "frames_with_both_fighters": 13643
+  },
+  "techniques": {
+    "total_events": 314,
+    "active_techniques": 314,
+    "red_techniques": 230,
+    "blue_techniques": 84,
+    "red_estimated_score": 493,
+    "blue_estimated_score": 210,
+    "technique_distribution": {
+      "Punch": 127,
+      "Back Kick": 48,
+      "Block": 38,
+      "Side Kick": 25,
+      "Spin Hook": 45,
+      "Axe Kick": 24,
+      "Front Kick": 7
+    },
+    "classifier_tier": "rule_based"
+  }
+}

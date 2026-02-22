@@ -1,0 +1,1 @@
+{"boxes": [{"box": 1, "track_id": 29, "auto_color": "red", "bbox": [601, 190, 818, 591]}, {"box": 2, "track_id": 1, "auto_color": "blue", "bbox": [703, 178, 905, 606]}, {"box": 3, "track_id": 27, "auto_color": "referee", "bbox": [381, 171, 568, 573]}, {"box": 4, "track_id": 20, "auto_color": "referee", "bbox": [248, 303, 383, 432]}], "frame": 15989}
